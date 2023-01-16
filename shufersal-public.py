@@ -1,7 +1,7 @@
 # HOW TO USE:
 # Open 10bis and the developers console.
 # Click on Network and look for the GetUser request (or any other fetch/xhr request).
-# Look for the header "user-token" and paste the value at line 124 instead of the placeholder
+# Look for the header "user-token" and paste the value at line 135 instead of the placeholder
 # Enjoy.
 
 import threading
@@ -68,7 +68,12 @@ class Shufersal:
             order = json.loads(res)
 
         if not order["barcode"]["used"]:
-            return {"url": order["barcode"]["barCodeImgUrl"], "amount": order["barcode"]["amount"]}
+            return {
+                "url": order["barcode"]["barCodeImgUrl"],
+                "amount": order["barcode"]["amount"],
+                "validDate": order["barcode"]["validDate"],
+                "barcodeNumber": order["barcode"]["barCodeNumber"]
+            }
 
     def download_barcodes(self):
         self.collect_shufersal_orders()
@@ -83,7 +88,7 @@ class Shufersal:
 
         with ThreadPoolExecutor() as executor:
             results = [
-                executor.submit(Shufersal._download_single_barcode, barcode["url"])
+                executor.submit(Shufersal._download_single_barcode, barcode)
                 for barcode in self.unused_barcodes
             ]
 
@@ -93,8 +98,13 @@ class Shufersal:
         os.chdir(original_dir)
 
     @staticmethod
-    def _download_single_barcode(url):
-        file_name = os.path.basename(url)
+    def _download_single_barcode(barcode):
+        url = barcode["url"]
+        file_name = "{}_{}_{}.png".format(
+            barcode["barcodeNumber"],
+            barcode["validDate"].replace("/", "_"),
+            barcode["amount"]
+        )
         with urllib.request.urlopen(url, timeout=60) as url:
             with open(file_name, 'wb') as f:
                 f.write(url.read())
@@ -122,7 +132,7 @@ def spinner():
         time.sleep(0.1)
 
 
-ten_bis = Shufersal(token="placeholder", months_back=50)
+ten_bis = Shufersal(token="placeholder", months_back=100)
 spinner_running = threading.Event()
 spinner_running.set()
 
@@ -137,5 +147,3 @@ spinner_running.clear()
 spinner_thread.join()
 
 ten_bis.summary()
-
-
