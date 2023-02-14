@@ -141,7 +141,7 @@ class Shufersal:
         subject = '10bis barcodes'
         message = 'Please see attached barcodes.'
 
-        img_path = [self.output_dir + "/" +img for img in os.listdir(self.output_dir)]
+        img_path =  [self.output_dir + "/" +img for img in os.listdir(self.output_dir)]
 
 
 
