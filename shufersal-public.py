@@ -128,12 +128,11 @@ class Shufersal:
         unused_coupons_count = len(self.unused_barcodes)
         unused_coupons_amount = sum(int(barcode["amount"]) for barcode in self.unused_barcodes)
 
-        print("Total shufersal coupons: {}".format(total_coupons_count))
-        print("Total amount of coupons: {}".format(total_coupuns_amount))
-        print("Used {} ILS".format(total_coupuns_amount-unused_coupons_amount))
-        print()
-        print("Unused coupons left: {}".format(unused_coupons_count))
-        print("Unused coupons amount: {} ILS".format(unused_coupons_amount))
+        summary_output = "Total shufersal coupons: {}\n".format(total_coupons_count)
+        summary_output += "Total amount of coupons: {}\n".format(total_coupuns_amount)
+        summary_output += "Used {} ILS\n\n".format(total_coupuns_amount - unused_coupons_amount)
+        summary_output += "Unused coupons left: {}\n".format(unused_coupons_count)
+        summary_output += "Unused coupons amount: {} ILS\n".format(unused_coupons_amount)
 
     def send_email(self):
         # Set up email data
@@ -203,5 +202,5 @@ result.join()
 spinner_running.clear()
 spinner_thread.join()
 
-ten_bis.summary()
+print(ten_bis.summary())
 ten_bis.send_email()
