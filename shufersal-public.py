@@ -13,6 +13,7 @@
 #
 # Enjoy.
 
+import argparse
 import threading
 import time
 import http.client
@@ -136,14 +137,12 @@ class Shufersal:
 
     def send_email(self):
         # Set up email data
-        sender_email = 'your_email@example.com'
-        receiver_email = 'recipient_email@example.com'
+        sender_email = 'eitan.pushett@cnvrg.io'
+        receiver_email = 'ey.pushett@gmail.com'
         subject = '10bis barcodes'
         message = 'Please see attached barcodes.'
 
-        img_path =  [self.output_dir + "/" +img for img in os.listdir(self.output_dir)]
-
-
+        img_path = [self.output_dir + "/" +img for img in os.listdir(self.output_dir)]
 
         # Create message container
         msg = MIMEMultipart()
@@ -161,14 +160,15 @@ class Shufersal:
             msg.attach(img_mime)
 
         # Connect to SMTP server and send email
-        smtp_server = 'smtp.example.com'
+        smtp_server = 'smtp.gmail.com'
         smtp_port = 587
-        smtp_username = 'your_username'
-        smtp_password = 'your_password'
+        smtp_username = 'eitan.pushett@cnvrg.io'
+        smtp_password = 'opjqkvhejfewwkmn'
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
             server.login(smtp_username, smtp_password)
             server.sendmail(sender_email, receiver_email, msg.as_string())
+
 
 def spinner():
     spinner_icons = itertools.cycle(['🍔', '🍟', '🍕', '🍩', '🍰', '🍝'])
@@ -179,16 +179,11 @@ def spinner():
         time.sleep(0.1)
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--send-email', action='store_true', help='Send an email with the barcodes')
+args = parser.parse_args()
 
-
-
-
-
-
-
-
-
-ten_bis = Shufersal(token="cvngqu7t225Sp7ZnQKi5sQ==", months_back=100)
+ten_bis = Shufersal(token="token", months_back=100)
 spinner_running = threading.Event()
 spinner_running.set()
 
@@ -203,4 +198,6 @@ spinner_running.clear()
 spinner_thread.join()
 
 print(ten_bis.summary())
-ten_bis.send_email()
+
+if args.send_email:
+    ten_bis.send_email()
