@@ -2,6 +2,15 @@
 # Open 10bis and the developers console.
 # Click on Network and look for the GetUser request (or any other fetch/xhr request).
 # Look for the header "user-token" and paste the value at line 135 instead of the placeholder
+#
+#email setup:
+# change sender_email and receiver_email to the email you want it sent from and received in
+#  Update the smtp:
+#         fields smtp_server = 'smtp.example.com' - for gmail mail change example to gmail
+#         smtp_port = 587 - depends on provider (587 is gmail)
+#         smtp_username = 'your_username' - your email that is the sender
+#         smtp_password = 'your_password' - use app passwords ( gmail example https://support.google.com/mail/answer/185833?hl=en)
+#
 # Enjoy.
 
 import threading
@@ -12,6 +21,10 @@ import json
 import os
 import shutil
 import urllib.request
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 
@@ -122,6 +135,41 @@ class Shufersal:
         print("Unused coupons left: {}".format(unused_coupons_count))
         print("Unused coupons amount: {} ILS".format(unused_coupons_amount))
 
+    def send_email(self):
+        # Set up email data
+        sender_email = 'your_email@example.com'
+        receiver_email = 'recipient_email@example.com'
+        subject = '10bis barcodes'
+        message = 'Please see attached barcodes.'
+
+        img_path = [self.output_dir + "/" +img for img in os.listdir(self.output_dir)]
+
+
+
+        # Create message container
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
+        msg['Subject'] = subject
+
+        # Attach message and image
+        msg.attach(MIMEText(message))
+        for img in img_path:
+            with open(img, 'rb') as img:
+                img_data = img.read()
+            img_mime = MIMEImage(img_data)
+            img_mime.add_header('Content-Disposition', 'attachment', filename='image.jpg')
+            msg.attach(img_mime)
+
+        # Connect to SMTP server and send email
+        smtp_server = 'smtp.example.com'
+        smtp_port = 587
+        smtp_username = 'your_username'
+        smtp_password = 'your_password'
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_username, smtp_password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
 
 def spinner():
     spinner_icons = itertools.cycle(['🍔', '🍟', '🍕', '🍩', '🍰', '🍝'])
@@ -130,6 +178,15 @@ def spinner():
             break
         print(next(spinner_icons), end="\r")
         time.sleep(0.1)
+
+
+
+
+
+
+
+
+
 
 
 ten_bis = Shufersal(token="cvngqu7t225Sp7ZnQKi5sQ==", months_back=100)
@@ -147,3 +204,4 @@ spinner_running.clear()
 spinner_thread.join()
 
 ten_bis.summary()
+ten_bis.send_email()
