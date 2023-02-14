@@ -3,13 +3,14 @@
 # Click on Network and look for the GetUser request (or any other fetch/xhr request).
 # Look for the header "user-token" and paste the value at line 135 instead of the placeholder
 #
-#email setup:
-# change sender_email and receiver_email to the email you want it sent from and received in
+# email setup:
+#  change sender_email and receiver_email to the email you want it sent from and received in
 #  Update the smtp:
 #         fields smtp_server = 'smtp.example.com' - for gmail mail change example to gmail
 #         smtp_port = 587 - depends on provider (587 is gmail)
 #         smtp_username = 'your_username' - your email that is the sender
 #         smtp_password = 'your_password' - use app passwords ( gmail example https://support.google.com/mail/answer/185833?hl=en)
+#  run the script with the --send-email flag
 #
 # Enjoy.
 
@@ -135,10 +136,12 @@ class Shufersal:
         summary_output += "Unused coupons left: {}\n".format(unused_coupons_count)
         summary_output += "Unused coupons amount: {} ILS\n".format(unused_coupons_amount)
 
+        return summary_output
+
     def send_email(self):
         # Set up email data
-        sender_email = 'eitan.pushett@cnvrg.io'
-        receiver_email = 'ey.pushett@gmail.com'
+        sender_email = 'sender'
+        receiver_email = 'receiver'
         subject = '10bis barcodes'
         message = 'Please see attached barcodes.'
 
@@ -162,8 +165,8 @@ class Shufersal:
         # Connect to SMTP server and send email
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
-        smtp_username = 'eitan.pushett@cnvrg.io'
-        smtp_password = 'opjqkvhejfewwkmn'
+        smtp_username = 'user'
+        smtp_password = 'password'
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
             server.login(smtp_username, smtp_password)
