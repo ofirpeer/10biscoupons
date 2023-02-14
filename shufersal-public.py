@@ -188,7 +188,7 @@ def spinner():
 
 
 
-ten_bis = Shufersal(token="cvngqu7t225Sp7ZnQKi5sQ==", months_back=100)
+ten_bis = Shufersal(token="token", months_back=100)
 spinner_running = threading.Event()
 spinner_running.set()
 
