@@ -2,8 +2,20 @@
 # Open 10bis and the developers console.
 # Click on Network and look for the GetUser request (or any other fetch/xhr request).
 # Look for the header "user-token" and paste the value at line 135 instead of the placeholder
+#
+# email setup:
+#  change sender_email and receiver_email to the email you want it sent from and received in
+#  Update the smtp:
+#         fields smtp_server = 'smtp.example.com' - for gmail mail change example to gmail
+#         smtp_port = 587 - depends on provider (587 is gmail)
+#         smtp_username = 'your_username' - your email that is the sender
+#         smtp_password = 'your_password' - use app passwords ( gmail example https://support.google.com/mail/answer/185833?hl=en)
+
+#  run the script with the --send-email flag
+#
 # Enjoy.
 
+import argparse
 import threading
 import time
 import http.client
@@ -12,6 +24,10 @@ import json
 import os
 import shutil
 import urllib.request
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 
@@ -115,12 +131,47 @@ class Shufersal:
         unused_coupons_count = len(self.unused_barcodes)
         unused_coupons_amount = sum(int(barcode["amount"]) for barcode in self.unused_barcodes)
 
-        print("Total shufersal coupons: {}".format(total_coupons_count))
-        print("Total amount of coupons: {}".format(total_coupuns_amount))
-        print("Used {} ILS".format(total_coupuns_amount-unused_coupons_amount))
-        print()
-        print("Unused coupons left: {}".format(unused_coupons_count))
-        print("Unused coupons amount: {} ILS".format(unused_coupons_amount))
+        summary_output = "Total shufersal coupons: {}\n".format(total_coupons_count)
+        summary_output += "Total amount of coupons: {}\n".format(total_coupuns_amount)
+        summary_output += "Used {} ILS\n\n".format(total_coupuns_amount - unused_coupons_amount)
+        summary_output += "Unused coupons left: {}\n".format(unused_coupons_count)
+        summary_output += "Unused coupons amount: {} ILS\n".format(unused_coupons_amount)
+
+        return summary_output
+
+    def send_email(self):
+        # Set up email data
+        sender_email = 'sender'
+        receiver_email = 'receiver'
+        subject = '10bis barcodes'
+        message = 'Please see attached barcodes.'
+
+        img_path = [self.output_dir + "/" +img for img in os.listdir(self.output_dir)]
+
+        # Create message container
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
+        msg['Subject'] = subject
+
+        # Attach message and image
+        msg.attach(MIMEText(message))
+        for img in img_path:
+            with open(img, 'rb') as img:
+                img_data = img.read()
+            img_mime = MIMEImage(img_data)
+            img_mime.add_header('Content-Disposition', 'attachment', filename='image.jpg')
+            msg.attach(img_mime)
+
+        # Connect to SMTP server and send email
+        smtp_server = 'smtp.gmail.com'
+        smtp_port = 587
+        smtp_username = 'user'
+        smtp_password = 'password'
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_username, smtp_password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
 
 
 def spinner():
@@ -132,7 +183,11 @@ def spinner():
         time.sleep(0.1)
 
 
-ten_bis = Shufersal(token="cvngqu7t225Sp7ZnQKi5sQ==", months_back=100)
+parser = argparse.ArgumentParser()
+parser.add_argument('--send-email', action='store_true', help='Send an email with the barcodes')
+args = parser.parse_args()
+
+ten_bis = Shufersal(token="token", months_back=100)
 spinner_running = threading.Event()
 spinner_running.set()
 
@@ -146,4 +201,7 @@ result.join()
 spinner_running.clear()
 spinner_thread.join()
 
-ten_bis.summary()
+print(ten_bis.summary())
+
+if args.send_email:
+    ten_bis.send_email()
