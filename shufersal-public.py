@@ -67,7 +67,7 @@ class Shufersal:
             res = conn.getresponse().read().decode("utf-8")
             order = json.loads(res)
 
-        if not order["barcode"]["used"]:
+        if not order["barcode"]["used"] and order["orderStatus"] != "Canceled":
             return {
                 "url": order["barcode"]["barCodeImgUrl"],
                 "amount": order["barcode"]["amount"],
@@ -132,7 +132,7 @@ def spinner():
         time.sleep(0.1)
 
 
-ten_bis = Shufersal(token="placeholder", months_back=100)
+ten_bis = Shufersal(token="cvngqu7t225Sp7ZnQKi5sQ==", months_back=100)
 spinner_running = threading.Event()
 spinner_running.set()
 
