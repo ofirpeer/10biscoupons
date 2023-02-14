@@ -204,4 +204,5 @@ spinner_running.clear()
 spinner_thread.join()
 
 print(ten_bis.summary())
+
 ten_bis.send_email()
