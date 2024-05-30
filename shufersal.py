@@ -1,4 +1,4 @@
-#  SEND EMAIL SETUP:
+#  email setup:
 #  change sender_email and receiver_email to the email you want it sent from and received in
 #  Update the smtp:
 #         fields smtp_server = 'smtp.example.com' - for gmail mail change example to gmail
@@ -150,6 +150,13 @@ class Shufersal:
         for f in results:
             result = f.result()
             if result:
+                if not result["url"]:
+                    print(
+                        "Skipping a corrupt barcode without url."
+                        "barcode:\r\n", str(result)
+                    )
+                    continue
+
                 self.unused_barcodes.append(result)
 
     def _fetch_unused_order(self, order_id):
@@ -193,18 +200,19 @@ class Shufersal:
         os.chdir(original_dir)
 
     def _download_single_barcode(self, barcode):
-        url = barcode["url"]
-        file_name = "{}_{}_{}.png".format(
-            barcode["barcodeNumber"],
-            barcode["validDate"].replace("/", "_"),
-            barcode["amount"]
-        )
         try:
+            url = barcode["url"]
+
+            file_name = "{}_{}_{}.png".format(
+                barcode["barcodeNumber"],
+                barcode["validDate"].replace("/", "_"),
+                barcode["amount"]
+            )
             with urllib.request.urlopen(url, timeout=60, context=self.context) as url:
                 with open(file_name, 'wb') as f:
                     f.write(url.read())
         except Exception as e:
-             print(e)
+            print(e)
 
     def summary(self):
         total_coupons_count = len(self.shufersal_transactions)
