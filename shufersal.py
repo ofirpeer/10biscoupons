@@ -233,11 +233,11 @@ class Shufersal:
             return
 
         # Set up email data
-        sender_email = 'peerofir@gmail.com'
-        receiver_email = 'peerofir@gmail.com'
+        sender_email = ''
+        receiver_email = ''
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
-        smtp_password = 'qdgveomdnigarnfv'
+        smtp_password = ''
 
         subject = '10bis barcodes'
         message = 'Please see attached barcodes.'
